@@ -85,11 +85,17 @@
                 <div class="mb-4">
                     <label for="yaml_file" class="block text-sm font-medium text-dark">配置文件</label>
                     <input type="file" id="yaml_file" name="yaml_file" class="mt-1 block w-full">
+                    {% if client.yaml_file %}
+                        <a href="{{ url_for('download_file', file_path=client.yaml_file) }}">下载现有的YAML配置文件</a><br>
+                    {% endif %}
                     <p class="mt-1 text-sm text-gray-500">当前文件: {{ client.yaml_file.split('/')[-1] if client.yaml_file else '未上传' }}</p>
                 </div>
                 <div class="mb-4">
                     <label for="template_file" class="block text-sm font-medium text-dark">模板文件</label>
                     <input type="file" id="template_file" name="template_file" class="mt-1 block w-full">
+                    {% if client.template_file %}
+                        <a href="{{ url_for('download_file', file_path=client.template_file) }}">下载现有的模板文件</a><br>
+                    {% endif %}
                     <p class="mt-1 text-sm text-gray-500">当前文件: {{ client.template_file.split('/')[-1] if client.template_file else '未上传' }}</p>
                 </div>
                 <div class="flex space-x-3">
