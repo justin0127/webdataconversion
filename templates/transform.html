@@ -1,0 +1,268 @@
+<!-- transform.html - 数据转换页面 -->
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>数据转换 - 数据转换平台</title>
+    <script src="{{ url_for('static', filename='js/tailwind.min.js') }}"></script>
+    <link href="{{ url_for('static', filename='css/font-awesome.min.css') }}" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#3B82F6',
+                        secondary: '#10B981',
+                        accent: '#8B5CF6',
+                        dark: '#1F2937',
+                        light: '#F9FAFB'
+                    },
+                    fontFamily: {
+                        inter: ['Inter', 'system-ui', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .content-auto {
+                content-visibility: auto;
+            }
+            .card-shadow {
+                box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            }
+            .transition-custom {
+                transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            }
+            .text-balance {
+                text-wrap: balance;
+            }
+        }
+    </style>
+</head>
+
+<body class="font-inter bg-gray-50 text-dark min-h-screen">
+    <!-- 导航栏 -->
+    <nav class="bg-white shadow-md sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0 flex items-center">
+                        <i class="fa fa-exchange text-primary text-2xl mr-2"></i>
+                        <span class="text-xl font-bold text-dark">数据转换平台</span>
+                    </div>
+                </div>
+                <div class="hidden md:ml-6 md:flex md:items-center md:space-x-4">
+                    <a href="/" class="text-gray-500 hover:text-primary px-3 py-2 rounded-md text-sm font-medium">首页</a>
+                    <a href="#"
+                        class="text-white bg-primary hover:bg-primary/90 px-3 py-2 rounded-md text-sm font-medium transition-custom">
+                        <i class="fa fa-plus mr-1"></i> 创建客户
+                    </a>
+                </div>
+                <div class="-mr-2 flex md:hidden items-center">
+                    <button type="button"
+                        class="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none">
+                        <i class="fa fa-bars text-xl"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 主要内容 -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div class="mb-8">
+            <div class="flex flex-col md:flex-row md:items-center md:justify-between">
+                <div>
+                    <h1 class="text-[clamp(1.5rem,3vw,2.5rem)] font-bold text-dark mb-2">数据转换</h1>
+                    <p class="text-gray-600 text-balance">为客户 {{ client.name }} 上传源数据文件并执行转换</p>
+                </div>
+                <div class="mt-4 md:mt-0">
+                    <a href="/"
+                        class="inline-flex items-center px-3 py-2 border border-gray-300 text-sm font-medium rounded-md shadow-sm text-gray-700 bg-white hover:bg-gray-50 transition-custom">
+                        <i class="fa fa-arrow-left mr-2"></i> 返回客户列表
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-xl shadow-md p-6 lg:p-8">
+            <div class="mb-8">
+                <div class="flex items-center mb-6">
+                    <div class="w-full progress-bar">
+                        <div class="progress-value" style="width: 33%"></div>
+                    </div>
+                </div>
+                <div class="flex justify-between mb-6">
+                    <div class="flex flex-col items-center">
+                        <div
+                            class="w-10 h-10 rounded-full flex items-center justify-center bg-primary text-white font-medium step-active">
+                            1</div>
+                        <p class="mt-2 text-sm text-gray-500">上传文件</p>
+                    </div>
+                    <div class="flex-1 h-1 bg-gray-200 mx-2"></div>
+                    <div class="flex flex-col items-center">
+                        <div
+                            class="w-10 h-10 rounded-full flex items-center justify-center bg-gray-200 text-gray-500 font-medium">
+                            2</div>
+                        <p class="mt-2 text-sm text-gray-500">执行转换</p>
+                    </div>
+                    <div class="flex-1 h-1 bg-gray-200 mx-2"></div>
+                    <div class="flex flex-col items-center">
+                        <div
+                            class="w-10 h-10 rounded-full flex items-center justify-center bg-gray-200 text-gray-500 font-medium">
+                            3</div>
+                        <p class="mt-2 text-sm text-gray-500">下载结果</p>
+                    </div>
+                </div>
+            </div>
+
+            <form method="POST" action="/client/{{ client.id }}/transform" enctype="multipart/form-data"
+                class="space-y-6">
+                <div>
+                    <label for="source_file" class="block text-sm font-medium text-gray-700 mb-1">源数据文件 <span
+                            class="text-red-500">*</span></label>
+                    <div class="file-drop-area" id="source-drop-area">
+                        <input type="file" id="source_file" name="source_file" accept=".xlsx,.xls,.csv"
+                            class="hidden" />
+                        <div class="flex flex-col items-center justify-center">
+                            <i class="fa fa-file-excel-o text-4xl text-gray-400 mb-3"></i>
+                            <p class="mb-2 text-sm text-gray-500">拖放源数据文件到此处或</p>
+                            <button type="button" class="text-primary text-sm font-medium hover:underline"
+                                onclick="document.getElementById('source_file').click()">
+                                浏览文件
+                            </button>
+                            <p class="mt-2 text-xs text-gray-500">支持 .xlsx, .xls 或 .csv 格式</p>
+                        </div>
+                        <div id="source-file-info" class="mt-3 hidden">
+                            <p class="text-sm text-gray-700"><i class="fa fa-check text-green-500 mr-1"></i> 已选择: <span
+                                    id="source-filename" class="font-medium"></span></p>
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                        <div class="flex">
+                            <div class="flex-shrink-0">
+                                <i class="fa fa-info-circle text-blue-500"></i>
+                            </div>
+                            <div class="ml-3">
+                                <h3 class="text-sm font-medium text-blue-800">配置信息</h3>
+                                <div class="mt-2 text-sm text-blue-700">
+                                    <p>YAML配置文件: {{ client.yaml_file.split('/')[-1] }}</p>
+                                    <p>目标模板文件: {{ client.template_file.split('/')[-1] }}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex justify-end space-x-4">
+                    <a href="/"
+                        class="px-4 py-2 border border-gray-300 text-sm font-medium rounded-md shadow-sm text-gray-700 bg-white hover:bg-gray-50 transition-custom">
+                        取消
+                    </a>
+                    <button type="submit"
+                        class="px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-primary hover:bg-primary/90 transition-custom">
+                        <i class="fa fa-exchange mr-2"></i> 开始转换
+                    </button>
+                </div>
+            </form>
+        </div>
+            <!-- 显示转换结果的区域 -->
+            <div id="resultArea" class="mt-6 hidden">
+                <div id="successMessage" class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative" role="alert">
+                    <span class="block sm:inline">转换成功！</span>
+                    <span id="successDetails" class="block sm:inline"></span>
+                </div>
+                <div id="errorMessage" class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
+                    <span class="block sm:inline">转换失败！</span>
+                    <span id="errorDetails" class="block sm:inline"></span>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- 页脚 -->
+    <footer class="bg-white border-t border-gray-200 mt-12">
+        <div class="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+            <div class="flex flex-col md:flex-row justify-between items-center">
+                <div class="mb-4 md:mb-0">
+                    <p class="text-sm text-gray-500">&copy; {{ now.year }} 数据转换平台. 保留所有权利.</p>
+                </div>
+                <div class="flex space-x-6">
+                    <a href="#" class="text-gray-400 hover:text-gray-500">
+                        <i class="fa fa-question-circle text-lg"></i>
+                    </a>
+                    <a href="#" class="text-gray-400 hover:text-gray-500">
+                        <i class="fa fa-cog text-lg"></i>
+                    </a>
+                    <a href="#" class="text-gray-400 hover:text-gray-500">
+                        <i class="fa fa-info-circle text-lg"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // 文件拖放功能
+            const sourceDropArea = document.getElementById('source-drop-area');
+
+            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                sourceDropArea.addEventListener(eventName, preventDefaults, false);
+            });
+
+            function preventDefaults(e) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+
+            ['dragenter', 'dragover'].forEach(eventName => {
+                sourceDropArea.addEventListener(eventName, highlight, false);
+            });
+
+            ['dragleave', 'drop'].forEach(eventName => {
+                sourceDropArea.addEventListener(eventName, unhighlight, false);
+            });
+
+            function highlight() {
+                this.classList.add('file-drop-active');
+            }
+
+            function unhighlight() {
+                this.classList.remove('file-drop-active');
+            }
+
+            ['drop'].forEach(eventName => {
+                sourceDropArea.addEventListener(eventName, handleDrop, false);
+            });
+
+            function handleDrop(e) {
+                const dt = e.dataTransfer;
+                const file = dt.files[0];
+
+                if (file.name.endsWith('.xlsx') || file.name.endsWith('.xls') || file.name.endsWith('.csv')) {
+                    document.getElementById('source_file').files = dt.files;
+                    document.getElementById('source-filename').textContent = file.name;
+                    document.getElementById('source-file-info').classList.remove('hidden');
+                }
+            }
+
+            // 文件选择功能
+            document.getElementById('source_file').addEventListener('change', function () {
+                if (this.files.length > 0) {
+                    document.getElementById('source-filename').textContent = this.files[0].name;
+                    document.getElementById('source-file-info').classList.remove('hidden');
+                }
+            });
+        });
+    </script>
+</body>
+
+</html>

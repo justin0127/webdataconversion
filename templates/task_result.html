@@ -1,0 +1,303 @@
+<!-- task_result.html -->
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>任务结果 - 数据转换平台</title>
+    <!-- 加载Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- 加载Font Awesome -->
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#3B82F6',
+                        secondary: '#10B981',
+                        success: '#10B981',
+                        warning: '#F59E0B',
+                        danger: '#EF4444',
+                        dark: '#1F2937',
+                        light: '#F9FAFB'
+                    },
+                    fontFamily: {
+                        inter: ['Inter', 'system-ui', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .content-auto {
+                content-visibility: auto;
+            }
+            .card-shadow {
+                box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            }
+            .transition-custom {
+                transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            }
+            .status-badge {
+                @apply px-2.5 py-0.5 rounded-full text-xs font-medium;
+            }
+        }
+    </style>
+</head>
+<body class="font-inter bg-gray-50 text-dark min-h-screen">
+    <!-- 导航栏 -->
+    <nav class="bg-white shadow-md sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0 flex items-center">
+                        <i class="fa fa-exchange text-primary text-2xl mr-2"></i>
+                        <span class="text-xl font-bold text-dark">数据转换平台</span>
+                    </div>
+                </div>
+                <div class="hidden md:ml-6 md:flex md:items-center md:space-x-4">
+                    <a href="/" class="text-gray-500 hover:text-primary px-3 py-2 rounded-md text-sm font-medium">首页</a>
+                    <a href="#" class="text-white bg-primary hover:bg-primary/90 px-3 py-2 rounded-md text-sm font-medium transition-custom">
+                        <i class="fa fa-plus mr-1"></i> 创建客户
+                    </a>
+                </div>
+                <div class="-mr-2 flex md:hidden items-center">
+                    <button type="button" class="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none">
+                        <i class="fa fa-bars text-xl"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 主要内容 -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div class="mb-8">
+            <div class="flex flex-col md:flex-row md:items-center md:justify-between">
+                <div>
+                    <h1 class="text-[clamp(1.5rem,3vw,2.5rem)] font-bold text-dark mb-2">任务结果</h1>
+                    <p class="text-gray-600 text-balance">查看客户 {{ client.name }} 的数据转换结果</p>
+                </div>
+                <div class="mt-4 md:mt-0">
+                    <a href="/" class="inline-flex items-center px-3 py-2 border border-gray-300 text-sm font-medium rounded-md shadow-sm text-gray-700 bg-white hover:bg-gray-50 transition-custom">
+                        <i class="fa fa-arrow-left mr-2"></i> 返回客户列表
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- 任务状态卡片 -->
+            <div class="lg:col-span-1 space-y-6">
+                <div class="bg-white rounded-xl shadow-md overflow-hidden card-shadow">
+                    <div class="bg-primary px-6 py-4">
+                        <h2 class="text-lg font-semibold text-white">任务摘要</h2>
+                    </div>
+                    <div class="p-6">
+                        <div class="space-y-4">
+                            <div>
+                                <p class="text-sm text-gray-500">任务ID</p>
+                                <p class="text-base font-medium text-dark">{{ task.id }}</p>
+                            </div>
+                            <div>
+                                <p class="text-sm text-gray-500">客户名称</p>
+                                <p class="text-base font-medium text-dark">{{ client.name }}</p>
+                            </div>
+                            <div>
+                                <p class="text-sm text-gray-500">创建时间</p>
+                                <p class="text-base font-medium text-dark">{{ task.created_at.strftime('%Y-%m-%d %H:%M:%S') }}</p>
+                            </div>
+                            <div>
+                                <p class="text-sm text-gray-500">任务状态</p>
+                                <p class="text-base font-medium {{ 'text-success' if task.status == 'completed' else 'text-danger' if task.status == 'failed' else 'text-warning' }}">
+                                    {{ '已完成' if task.status == 'completed' else '失败' if task.status == 'failed' else '进行中' }}
+                                    <span class="status-badge {{ 'bg-success/10 text-success' if task.status == 'completed' else 'bg-danger/10 text-danger' if task.status == 'failed' else 'bg-warning/10 text-warning' }} ml-2">
+                                        {{ task.status | capitalize }}
+                                    </span>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-xl shadow-md overflow-hidden card-shadow">
+                    <div class="bg-primary px-6 py-4">
+                        <h2 class="text-lg font-semibold text-white">操作</h2>
+                    </div>
+                    <div class="p-6">
+                        <div class="space-y-3">
+                            {% if task.status == 'completed' and task.result_file %}
+                            <a href="{{ url_for('download_file', file_path=task.result_file) }}" class="w-full flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-primary hover:bg-primary/90 transition-custom">
+                                <i class="fa fa-download mr-2"></i> 下载结果文件
+                            </a>
+                            {% else %}
+                            <button class="w-full flex items-center justify-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md shadow-sm text-gray-700 bg-white hover:bg-gray-50 transition-custom" disabled>
+                                <i class="fa fa-download mr-2"></i> 结果文件不可用
+                            </button>
+                            {% endif %}
+                            
+                            <a href="/client/{{ client.id }}/transform" class="w-full flex items-center justify-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md shadow-sm text-gray-700 bg-white hover:bg-gray-50 transition-custom">
+                                <i class="fa fa-refresh mr-2"></i> 新转换任务
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 任务详情卡片 -->
+            <div class="lg:col-span-2 space-y-6">
+                <div class="bg-white rounded-xl shadow-md overflow-hidden card-shadow">
+                    <div class="bg-primary px-6 py-4">
+                        <h2 class="text-lg font-semibold text-white">转换详情</h2>
+                    </div>
+                    <div class="p-6">
+                        <div class="space-y-6">
+                            <div>
+                                <h3 class="text-base font-semibold text-dark mb-3">源文件信息</h3>
+                                <div class="bg-gray-50 p-4 rounded-lg">
+                                    <p class="text-sm text-gray-500">文件路径</p>
+                                    <p class="text-base font-medium text-dark">{{ task.source_file.split('/')[-1] }}</p>
+                                    <p class="text-sm text-gray-500 mt-2">文件类型</p>
+                                    <p class="text-base font-medium text-dark">
+                                        {% set ext = task.source_file.split('.')[-1].lower() %}
+                                        {% if ext == 'xlsx' or ext == 'xls' %}
+                                            Excel 文件
+                                        {% elif ext == 'csv' %}
+                                            CSV 文件
+                                        {% else %}
+                                            未知文件类型
+                                        {% endif %}
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div>
+                                <h3 class="text-base font-semibold text-dark mb-3">配置文件</h3>
+                                <div class="bg-gray-50 p-4 rounded-lg">
+                                    <p class="text-sm text-gray-500">YAML 配置</p>
+                                    <p class="text-base font-medium text-dark">{{ client.yaml_file.split('/')[-1] }}</p>
+                                    <p class="text-sm text-gray-500 mt-2">目标模板</p>
+                                    <p class="text-base font-medium text-dark">{{ client.template_file.split('/')[-1] }}</p>
+                                </div>
+                            </div>
+
+                            {% if task.status == 'completed' and task.result_file %}
+                            <div>
+                                <h3 class="text-base font-semibold text-dark mb-3">结果文件</h3>
+                                <div class="bg-green-50 border border-green-200 p-4 rounded-lg">
+                                    <p class="text-sm text-green-700">
+                                        <i class="fa fa-check-circle mr-2"></i> 转换成功，结果文件已生成
+                                    </p>
+                                    <p class="text-base font-medium text-dark mt-2">{{ task.result_file.split('/')[-1] }}</p>
+                                </div>
+                            </div>
+                            {% elif task.status == 'failed' %}
+                            <div>
+                                <h3 class="text-base font-semibold text-dark mb-3">错误信息</h3>
+                                <div class="bg-red-50 border border-red-200 p-4 rounded-lg">
+                                    <p class="text-sm text-red-700">
+                                        <i class="fa fa-exclamation-circle mr-2"></i> 转换过程中发生错误
+                                    </p>
+                                    <p class="text-base text-red-800 mt-2">
+                                        抱歉，数据转换未能完成。请检查源文件格式或联系管理员。
+                                    </p>
+                                </div>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-xl shadow-md overflow-hidden card-shadow">
+                    <div class="bg-primary px-6 py-4">
+                        <h2 class="text-lg font-semibold text-white">转换日志</h2>
+                    </div>
+                    <div class="p-6">
+                        <div class="space-y-4">
+                            <div class="bg-gray-50 p-4 rounded-lg">
+                                <p class="text-sm text-gray-500">任务开始</p>
+                                <p class="text-base text-dark mt-1">系统已接收转换请求，开始处理数据...</p>
+                                <p class="text-xs text-gray-400 mt-2">{{ now.strftime('%Y-%m-%d %H:%M:%S') }}</p>
+                            </div>
+                            
+                            <div class="bg-gray-50 p-4 rounded-lg">
+                                <p class="text-sm text-gray-500">数据读取</p>
+                                <p class="text-base text-dark mt-1">已成功读取源文件和模板文件</p>
+                                <p class="text-xs text-gray-400 mt-2">{{ now.strftime('%Y-%m-%d %H:%M:%S') }}</p>
+                            </div>
+                            
+                            {% if task.status == 'completed' %}
+                            <div class="bg-green-50 border border-green-200 p-4 rounded-lg">
+                                <p class="text-sm text-green-500">转换完成</p>
+                                <p class="text-base text-green-800 mt-1">数据转换成功完成，结果文件已生成</p>
+                                <p class="text-xs text-green-500 mt-2">{{ now.strftime('%Y-%m-%d %H:%M:%S') }}</p>
+                            </div>
+                            {% elif task.status == 'failed' %}
+                            <div class="bg-red-50 border border-red-200 p-4 rounded-lg">
+                                <p class="text-sm text-red-500">转换失败</p>
+                                <p class="text-base text-red-800 mt-1">数据转换过程中发生错误，详情请联系管理员</p>
+                                <p class="text-xs text-red-500 mt-2">{{ now.strftime('%Y-%m-%d %H:%M:%S') }}</p>
+                            </div>
+                            {% else %}
+                            <div class="bg-yellow-50 border border-yellow-200 p-4 rounded-lg">
+                                <p class="text-sm text-yellow-500">处理中</p>
+                                <p class="text-base text-yellow-800 mt-1">数据转换正在进行中，请稍候...</p>
+                                <p class="text-xs text-yellow-500 mt-2">{{ now.strftime('%Y-%m-%d %H:%M:%S') }}</p>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- 页脚 -->
+    <footer class="bg-white border-t border-gray-200 mt-12">
+        <div class="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+            <div class="flex flex-col md:flex-row justify-between items-center">
+                <div class="mb-4 md:mb-0">
+                    <p class="text-sm text-gray-500">&copy; {{ now.year if now else '2025' }} 数据转换平台. 保留所有权利.</p>
+                </div>
+                <div class="flex space-x-6">
+                    <a href="#" class="text-gray-400 hover:text-gray-500">
+                        <i class="fa fa-question-circle text-lg"></i>
+                    </a>
+                    <a href="#" class="text-gray-400 hover:text-gray-500">
+                        <i class="fa fa-cog text-lg"></i>
+                    </a>
+                    <a href="#" class="text-gray-400 hover:text-gray-500">
+                        <i class="fa fa-info-circle text-lg"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // 简单的交互效果
+        document.addEventListener('DOMContentLoaded', function() {
+            // 按钮悬停效果
+            const buttons = document.querySelectorAll('button, a[class*="px-4.py-2"]');
+            buttons.forEach(button => {
+                button.addEventListener('mouseenter', function() {
+                    this.style.transform = 'translateY(-1px)';
+                });
+                button.addEventListener('mouseleave', function() {
+                    this.style.transform = 'translateY(0)';
+                });
+            });
+            
+            // 模拟实时更新状态（实际应用中可通过WebSocket实现）
+            if (document.querySelector('.status-badge')) {
+                const statusBadge = document.querySelector('.status-badge');
+                if (statusBadge.textContent.trim() === 'Completed') {
+                    statusBadge.classList.add('animate-pulse');
+                }
+            }
+        });
+    </script>
+</body>
+</html>
