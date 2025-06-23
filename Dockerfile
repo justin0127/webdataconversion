@@ -16,7 +16,8 @@ COPY . .
 # 设置环境变量
 ENV FLASK_APP=app.py
 ENV FLASK_ENV=production
-ENV SECRET_KEY=your-secret-key-here  # 建议在运行时通过环境变量覆盖
+ENV SECRET_KEY=your-secret-key-here  
+# 建议在运行时通过环境变量覆盖
 
 # 暴露应用端口
 EXPOSE 5000
