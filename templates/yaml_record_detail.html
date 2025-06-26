@@ -1,10 +1,10 @@
-<!-- index.html - 首页 -->
+<!-- yaml_record_detail.html - YAML记录详情 -->
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>数据转换平台</title>
+    <title>YAML记录详情 - 数据转换平台</title>
     <script src="{{ url_for('static', filename='js/tailwind.min.js') }}"></script>
     <link href="{{ url_for('static', filename='css/font-awesome.min.css') }}" rel="stylesheet">
     <script>
@@ -36,8 +36,10 @@
             .transition-custom {
                 transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             }
-            .text-balance {
-                text-wrap: balance;
+            .yaml-content {
+                font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+                white-space: pre-wrap;
+                overflow-x: auto;
             }
         }
     </style>
@@ -58,8 +60,11 @@
                     <a href="/client/create" class="text-white bg-primary hover:bg-primary/90 px-3 py-2 rounded-md text-sm font-medium transition-custom">
                         <i class="fa fa-plus mr-1"></i> 创建客户
                     </a>
-                    <a href="generate_yaml" class="text-white bg-primary hover:bg-primary/90 px-3 py-2 rounded-md text-sm font-medium transition-custom">
-                        <i class="fa fa-plus mr-1"></i> yaml文件生成器
+                    <a href="/generate_yaml" class="text-white bg-primary hover:bg-primary/90 px-3 py-2 rounded-md text-sm font-medium transition-custom">
+                        <i class="fa fa-file-text-o mr-1"></i> YAML 生成器
+                    </a>
+                    <a href="/yaml_records" class="text-white bg-secondary hover:bg-secondary/90 px-3 py-2 rounded-md text-sm font-medium transition-custom">
+                        <i class="fa fa-history mr-1"></i> YAML 记录
                     </a>
                     <!-- 新增登出按钮 -->
                     <a href="/logout" class="text-gray-700 hover:text-red-600 px-3 py-2 rounded-md text-sm font-medium transition-custom">
@@ -78,45 +83,58 @@
     <!-- 主要内容 -->
     <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div class="mb-8">
-            <h1 class="text-[clamp(1.5rem,3vw,2.5rem)] font-bold text-dark mb-2">客户数据转换</h1>
-            <p class="text-gray-600 text-balance">管理客户配置，上传源数据文件，并执行数据转换任务</p>
+            <h1 class="text-[clamp(1.5rem,3vw,2.5rem)] font-bold text-dark mb-2">YAML记录详情</h1>
+            <p class="text-gray-600">查看YAML配置文件的详细信息</p>
         </div>
 
-        <!-- 客户列表 -->
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <div class="bg-white rounded-xl p-6 card-shadow hover:shadow-lg transition-custom">
-                <div class="flex items-center justify-between mb-4">
-                    <h2 class="text-xl font-semibold text-dark">没有客户数据</h2>
-                    <span class="bg-blue-100 text-blue-800 text-xs font-semibold mr-2 px-2.5 py-0.5 rounded">新建</span>
+        <!-- 记录详情 -->
+        <div class="bg-white rounded-xl p-6 card-shadow">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                <div class="bg-gray-50 rounded-lg p-4">
+                    <h3 class="text-sm font-medium text-gray-500 mb-1">记录ID</h3>
+                    <p class="text-lg font-semibold text-gray-900">{{ record.id[:8] }}...</p>
                 </div>
-                <p class="text-gray-500 mb-6">您还没有创建任何客户，请点击"创建客户"按钮开始管理您的客户数据转换配置。</p>
-                <a href="/client/create" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-primary hover:bg-primary/90 transition-custom">
-                    <i class="fa fa-plus mr-2"></i> 创建新客户
-                </a>
+                <div class="bg-gray-50 rounded-lg p-4">
+                    <h3 class="text-sm font-medium text-gray-500 mb-1">创建时间</h3>
+                    <p class="text-lg font-semibold text-gray-900">{{ record.created_at.strftime('%Y-%m-%d %H:%M:%S') }}</p>
+                </div>
+                <div class="bg-gray-50 rounded-lg p-4">
+                    <h3 class="text-sm font-medium text-gray-500 mb-1">关联客户端</h3>
+                    <p class="text-lg font-semibold text-gray-900">
+                        {% if record.client %}
+                            {{ record.client.name }}
+                        {% else %}
+                            无关联客户端
+                        {% endif %}
+                    </p>
+                </div>
             </div>
 
-            {% for client in clients %}
-            <div class="bg-white rounded-xl p-6 card-shadow hover:shadow-lg transition-custom">
-                <div class="flex items-center justify-between mb-4">
-                    <h2 class="text-xl font-semibold text-dark">{{ client.name }}</h2>
-                    <span class="bg-green-100 text-green-800 text-xs font-semibold mr-2 px-2.5 py-0.5 rounded">已配置</span>
-                </div>
-                <p class="text-gray-500 mb-6">配置文件: {{ client.yaml_file.split('/')[-1] if client.yaml_file else '未上传' }}</p>
-                <p class="text-gray-500 mb-6">模板文件: {{ client.template_file.split('/')[-1] if client.template_file else '未上传' }}</p>
-                <div class="flex space-x-3">
-                    <a href="/client/{{ client.id }}/transform" class="flex-1 inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-primary hover:bg-primary/90 transition-custom">
-                        <i class="fa fa-exchange mr-2"></i> 执行转换
-                    </a>
-                    <a href="/client/{{ client.id }}/update" class="flex-1 inline-flex items-center justify-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md shadow-sm text-gray-700 bg-white hover:bg-gray-50 transition-custom">
-                        <i class="fa fa-cog mr-2"></i> 配置
-                    </a>
-                    <!-- 新增删除按钮 -->
-                    <a href="/client/{{ client.id }}/delete" class="flex-1 inline-flex items-center justify-center px-4 py-2 border border-red-300 text-sm font-medium rounded-md shadow-sm text-red-700 bg-white hover:bg-red-50 transition-custom">
-                        <i class="fa fa-trash mr-2"></i> 删除
-                    </a>
+            <div class="mb-6">
+                <h2 class="text-xl font-semibold text-dark mb-4">描述</h2>
+                <p class="text-gray-700">{{ record.description }}</p>
+            </div>
+
+            <div class="mb-6">
+                <h2 class="text-xl font-semibold text-dark mb-4">YAML内容</h2>
+                <div class="bg-gray-800 text-gray-100 p-4 rounded-lg yaml-content">
+                    {% if yaml_data %}
+                        <pre>{{ yaml.dump(yaml_data, allow_unicode=True, default_flow_style=False, sort_keys=False) }}</pre>
+                    {% else %}
+                        <p class="text-red-400">无法解析YAML内容</p>
+                        <pre>{{ record.yaml_content }}</pre>
+                    {% endif %}
                 </div>
             </div>
-            {% endfor %}
+
+            <div class="flex justify-end space-x-4">
+                <a href="{{ url_for('yaml_records') }}" class="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 transition-custom">
+                    <i class="fa fa-arrow-left mr-2"></i> 返回列表
+                </a>
+                <a href="{{ url_for('download_yaml_record', record_id=record.id) }}" class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-secondary hover:bg-secondary/90 transition-custom">
+                    <i class="fa fa-download mr-2"></i> 下载YAML
+                </a>
+            </div>
         </div>
     </main>
 
@@ -134,7 +152,7 @@
                     <a href="#" class="text-gray-400 hover:text-gray-500">
                         <i class="fa fa-cog text-lg"></i>
                     </a>
-                    <a href="https://github.com/justin0127/webdataconversion/blob/main/readme.md" class="text-gray-400 hover:text-gray-500">
+                    <a href="#" class="text-gray-400 hover:text-gray-500">
                         <i class="fa fa-info-circle text-lg"></i>
                     </a>
                 </div>
